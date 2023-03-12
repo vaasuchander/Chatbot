@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Ingress</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+      }
+
+      header {
+        background-color: green;
+        color: white;
+        text-align: center;
+        padding: 10px;
+      }
+
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+
+      .chat-box {
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        padding: 10px;
+        margin-bottom: 10px;
+      }
+
+      .user-message {
+        display: flex;
+        justify-content: flex-end;
+      }
+
+      .bot-message {
+        display: flex;
+        justify-content: flex-start;
+      }
+
+      .message-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        margin-right: 10px;
+      }
+
+      .user-icon {
+        background-color: #007bff;
+      }
+
+      .bot-icon {
+        background-color: #28a745;
+      }
+
+      .message-text {
+        background-color: #f2f2f2;
+        padding: 10px;
+        border-radius: 5px;
+        max-width: 80%;
+      }
+
+      .submit-button {
+        background-color: #007bff;
+        color: white;
+        border: none;
+        padding: 10px;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+
+      .submit-button:hover {
+        background-color: #0056b3;
+      }
+
+    </style>
+</head>
+<body>
+<header>
+    <h1>Ingress</h1>
+</header>
+<div class="container">
+    <div class="chat-box bot-message">
+        <div class="message-icon bot-icon"></div>
+        <div class="message-text">Hi there! How can I help you today?</div>
+    </div>
+    <div id="chatlog"></div>
+    <div class="chat-box user-message">
+        <div class="message-icon user-icon"></div>
+        <input type="text" id="user-input">
+        <button class="submit-button" onclick="submitUserMessage()">Send</button>
+    </div>
+</div>
+<script>
+  var userInput = document.getElementById("user-input");
+  userInput.addEventListener("keydown", function(event) {
+    if (event.keyCode === 13) {
+      event.preventDefault();
+      submitUserMessage();
+    }
+  });
+
+   function submitUserMessage() {
+    var userInput = document.getElementById("user-input").value;
+    var chatLog = document.getElementById("chatlog");
+    var userMessage = '<div class="chat-box user-message"><div class="message-icon user-icon"></div><div class="message-text">' + userInput + '</div></div>';
+    //var botMessage = '<div class="chat-box bot-message"><div class="message-icon bot-icon"></div><div class="message-text">I\'m sorry, I don\'t understand. Can you please rephrase your question?</div></div>';
+    chatLog.innerHTML += userMessage;
+   // chatLog.innerHTML += botMessage;
+    document.getElementById("user-input").value = "";
+
+    fetch("/chat", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            "message": userInput
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log(data); // add this line to check the response data
+        var botMessage = '<div class="chat-box bot-message"><div class="message-icon bot-icon"></div><div class="message-text">' + data.chat_response + '</div></div>';
+        chatLog.innerHTML += botMessage;
+    })
+    .catch(error => console.error(error));
+}
+</script>
+</body>
+</html>
